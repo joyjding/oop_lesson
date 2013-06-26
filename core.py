@@ -7,6 +7,8 @@ class GameElement(object):
         self.board = None
         self.x = None
         self.y = None
+        self.last_time = 0
+        self.mark=0
 
     def interact(self, player):
         pass
@@ -15,4 +17,6 @@ class GameElement(object):
         return "<%s located at %r, %r>"%(type(self).__name__, self.x, self.y)
 
     def update(self, dt):
+        
         pass
+
