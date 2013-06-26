@@ -9,6 +9,7 @@ GAME_BOARD = None
 DEBUG = False
 KEYBOARD = None
 PLAYER = None
+OPPO=None
 ######################
 
 GAME_WIDTH = 7
@@ -16,51 +17,58 @@ GAME_HEIGHT = 7
 
 #### Put class definitions here ####
 class Tree (GameElement):
-	IMAGE = "ShortTree"
+	IMAGE = "Rock"
 	SOLID = True
 
-class Cw1_tree(GameElement):
-	IMAGE = "TallTree"
-	SOLID = True
+	def interact(self,player):
+		player.health-=1
+		GAME_BOARD.draw_msg("%s hit a bump! Minus 1 Health. Your current health is %d / 3!" % (player.name, player.health))
 
 	def update(self,dt):
-		if PLAYER.x == 6 and PLAYER.y ==6:
-			return
+		if (PLAYER.x==6 and PLAYER.y==6) or (OPPO.x==6 and OPPO.y==6) :
+			self.end=True
+			GAME_BOARD.del_el(self.x, self.y)
 
+
+class MovingTree(Tree):
+	IMAGE="TallTree"
+
+class Cw1_tree(MovingTree):
+
+	def update(self,dt):
+		
+		if self.end==True:
+			GAME_BOARD.del_el(self.x, self.y)
+			return
 		self.last_time+=dt
 		if self.last_time<1 or self.x==6 or self.y==6:
 			return
 		if self.mark==0:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x+1,self.y,self)
-			print self.x, self.y
 			self.last_time=0
 			self.mark=1
 		elif self.mark==1:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x,self.y+1,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=2
 		elif self.mark==2:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x-1,self.y,self)
-			print self.x, self.y
 			self.last_time=0
 			self.mark=3
 		elif self.mark==3:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x,self.y-1,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=0			
 		
-class Ccw2_tree(GameElement):
-	IMAGE = "TallTree"
-	SOLID = True
+class Ccw2_tree(MovingTree):
 
 	def update(self,dt):
-		if PLAYER.x == 6 and PLAYER.y ==6:
+		if (PLAYER.x == 6 and PLAYER.y ==6) or (OPPO.x == 6 and OPPO.y ==6):
+			GAME_BOARD.del_el(self.x, self.y)
 			return
 
 		self.last_time+=dt
@@ -69,34 +77,28 @@ class Ccw2_tree(GameElement):
 		if self.mark==0:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x-2,self.y,self)
-			print self.x, self.y
 			self.last_time=0
 			self.mark=1
 		elif self.mark==1:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x,self.y+2,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=2
 		elif self.mark==2:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x+2,self.y,self)
-			print self.x, self.y
 			self.last_time=0
 			self.mark=3
 		elif self.mark==3:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x,self.y-2,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=0			
 
-class Zigzag_tree(GameElement):
-	IMAGE = "TallTree"
-	SOLID = True
-
+class Zigzag_tree(MovingTree):
+	
 	def update(self,dt):
-		if PLAYER.x == 6 and PLAYER.y ==6:
+		if (PLAYER.x == 6 and PLAYER.y ==6) or (OPPO.x == 6 and OPPO.y ==6):
 			return
 		self.last_time+=dt
 		if self.last_time<2:
@@ -104,70 +106,64 @@ class Zigzag_tree(GameElement):
 		if self.mark==0:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x+1,self.y,self)
-			print self.x, self.y
 			self.last_time=0
 			self.mark=1
 		elif self.mark==1:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x,self.y+1,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=2
 		elif self.mark==2:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x+1,self.y,self)
-			print self.x, self.y
 			self.last_time=0
 			self.mark=3
 		elif self.mark==3:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x,self.y+1,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=4		
 		elif self.mark==4:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x+1,self.y,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=5	
 		elif self.mark==5:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x-1,self.y,self)
-			print self.x, self.y
 			self.last_time=0
 			self.mark=6
 		elif self.mark==6:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x,self.y-1,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=7
 		elif self.mark==7:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x-1,self.y,self)
-			print self.x, self.y
 			self.last_time=0
 			self.mark=8
 		elif self.mark==8:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x,self.y-1,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=9	
 		elif self.mark==9:
 			GAME_BOARD.del_el(self.x, self.y)
 			GAME_BOARD.set_el(self.x-1,self.y,self)
-			print self.x, self.y
 			self.last_time=0	    	
 			self.mark=0		
 
 
 class Character(GameElement):
-	IMAGE="Horns"
+	IMAGE = "Horns"
+	SOLID = True
+
 	def __init__(self):
 		GameElement.__init__(self)
 		self.totebag = []
+		self.health = 3
+		self.name = "Slayer"
 
 	def text_next(self, direction):
 		if direction == "up":
@@ -180,19 +176,69 @@ class Character(GameElement):
 			return (self.x+1, self.y)
 		return None
 
+	def update(self,dt):
+		if self.health==0:
+		
+			GAME_BOARD.del_el(self.x,self.y)
+			GAME_BOARD.set_el(1,0,self)
+			GAME_BOARD.draw_msg("Slayer, you've lost all your health. Come back home!")
+			self.health=3
+
+
+class Opponent(Character):
+	IMAGE = "Princess"
+	SOLID=True
+
+	def __init__(self):
+		GameElement.__init__(self)
+		self.totebag = []
+		self.health = 3
+		self.name = "Prancy"
+
+	def text_next(self, op_direction):
+		if op_direction == "up":
+			return (self.x, self.y-1)
+		elif op_direction == "down":
+			return (self.x, self.y+1)
+		elif op_direction == "left":
+			return (self.x-1, self.y)
+		elif op_direction == "right":
+			return (self.x+1, self.y)
+		return None
+
+	def update(self,dt):
+		if self.health==0:
+		
+			GAME_BOARD.del_el(self.x, self.y)
+			GAME_BOARD.set_el(0,1,self)
+			GAME_BOARD.draw_msg("Prancy, you've lost all your health! Come back home!")
+			self.health=3
+
+
 class Gem(GameElement):
 	IMAGE ="BlueGem"
 	SOLID = False
 
 	def interact(self,player):
 		player.totebag.append(self)
-		GAME_BOARD.draw_msg("Capture the gems before the trees crush them! You have %d items!" %(len(player.totebag)))
+		
+		GAME_BOARD.draw_msg("%s got a gem! You have %d items!" %(player.name, len(player.totebag)))
 	def update(self,dt):
+		gem_ppp=[(0,6),(1,6),(2,6),(3,6),(4,6),(5,6),
+		(6,0),(6,1),(6,2),(6,3),(6,4),(6,5)]
+		winner = False
 		if PLAYER.x == 6 and PLAYER.y ==6:
+			winner=PLAYER.name
+		if OPPO.x ==6 and OPPO.y==6:
+			winner=OPPO.name
+		if winner !=False:
 			for i in range(6):
 				for j in range(6):
-					GAME_BOARD.set_el(i,j,self)
-			GAME_BOARD.draw_msg("You win! Capture the gems!.")    
+					gem_ppp.append((i,j))
+			for pos in gem_ppp:
+				GAME_BOARD.set_el(pos[0],pos[1],self)
+			GAME_BOARD.draw_msg("%s, you win! Here's 25 more gems!" %winner)
+
 
 class Finish_block(GameElement):
 	IMAGE = "Chest"
@@ -202,6 +248,7 @@ class Finish_block(GameElement):
 def keyboard_handler():
 
 	direction = None
+	op_direction=None
 
 	if KEYBOARD[key.UP] and PLAYER.y!=0:
 		direction="up"
@@ -212,6 +259,16 @@ def keyboard_handler():
 	elif KEYBOARD[key.LEFT] and PLAYER.x!=0:                
 		direction="left"
 
+	elif KEYBOARD[key.W] and OPPO.y!=0:
+		op_direction="up"
+	elif KEYBOARD[key.S] and OPPO.y!=6:        
+		op_direction="down"
+	elif KEYBOARD[key.D] and OPPO.x!=6:       
+		op_direction="right"
+	elif KEYBOARD[key.A] and OPPO.x!=0:                
+		op_direction="left"		
+
+
 	if direction:
 		next_location = PLAYER.text_next(direction)
 		next_x = next_location[0]
@@ -221,14 +278,30 @@ def keyboard_handler():
 			existing_el.interact(PLAYER)
 		if existing_el is None or not existing_el.SOLID:
 			GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
-			GAME_BOARD.set_el(next_x,next_y,PLAYER)   	
+			GAME_BOARD.set_el(next_x,next_y,PLAYER)   
+
+	if op_direction:
+		next_location = OPPO.text_next(op_direction)
+		next_x = next_location[0]
+		next_y = next_location[1]
+		existing_el=GAME_BOARD.get_el(next_x,next_y)
+		if existing_el:
+			existing_el.interact(OPPO)
+		if existing_el is None or not existing_el.SOLID:
+			GAME_BOARD.del_el(OPPO.x, OPPO.y)
+			GAME_BOARD.set_el(next_x,next_y,OPPO)  
+
 
 def initialize():  
 	global PLAYER
 	PLAYER=Character()
 	GAME_BOARD.register(PLAYER)
-	GAME_BOARD.set_el(0,0,PLAYER)
-	print PLAYER.x, PLAYER.y,"this is the player's position"
+	GAME_BOARD.set_el(1,0,PLAYER)
+
+	global OPPO
+	OPPO=Opponent()
+	GAME_BOARD.register(OPPO)
+	GAME_BOARD.set_el(0,1,OPPO)	
 	
 	cwtrees_position=[(0,3),(4,1),(3,0),(5,2)]
 	cwtrees=[]
@@ -238,7 +311,7 @@ def initialize():
 		GAME_BOARD.set_el(pos[0],pos[1],cw_tree)
 		cwtrees.append(cw_tree)
 
-	trees_position=[(6,1),(3,3),(2,6),(2,5),(1,1),(2,1),(1,0),(0,6),(0,5),(5,5)]
+	trees_position=[(6,1),(3,3),(2,6),(1,1),(2,1),(1,2),(0,6),(0,5),(5,5)]
 	trees=[]
 	for pos in trees_position:
 		tree=Tree()
@@ -254,8 +327,18 @@ def initialize():
 	GAME_BOARD.register(ziggy)
 	GAME_BOARD.set_el(1,3, ziggy)
 	
-	gem = Gem()	
-	GAME_BOARD.register(gem)
+	gems=[]
+	gem_positions=[(0,2),(0,3),(0,4),
+	(3,2),(4,2),(5,2),(2,0),
+	(0,3),(1,3),(2,3),(4,3),(5,3),(6,3),
+	(0,4),(1,4),(2,4),(3,4),
+	(4,5),(6,5),
+	(1,6),(3,6),(6,6)]
+	for pos in gem_positions:
+		gem=Gem()
+		GAME_BOARD.register(gem)
+		GAME_BOARD.set_el(pos[0],pos[1],gem)
+		gems.append(gem)	
 
 	finish = Finish_block()
 	GAME_BOARD.register(finish)
