@@ -5,7 +5,7 @@ from pyglet.window import key
 from core import GameElement
 
 SCREEN_X = 800
-SCREEN_Y = 700
+SCREEN_Y = 800
 
 game_window = pyglet.window.Window(SCREEN_X, SCREEN_Y)
 
@@ -74,9 +74,9 @@ class Board(object):
         for i in range(height):
             if i == 0 or i == height-1:
                 # On the boundaries
-                game_map.append(["Block"] * width)
+                game_map.append(["GrassBlock"] * width) #took away stoneblock border
             else:
-                row = ["Block"] + (["GrassBlock"] * inner_width) + ["Block"]
+                row = ["GrassBlock"] + (["GrassBlock"] * inner_width) + ["GrassBlock"] #replaced stoneblock border with grass
                 game_map.append(row)
         
         self.base_board = game_map
@@ -167,6 +167,13 @@ class Board(object):
                 if el:
                     self.draw_active(el.sprite, x, y)
 
+    def wipe(self):
+        for x in range(self.width):
+            for y in range(self.height):
+                self.del_el(x,y)
+    
+
+
 
 class Obstacle(GameElement):
     pass
@@ -193,7 +200,7 @@ def run():
         board = Board(game.GAME_WIDTH, game.GAME_HEIGHT)
     except (AttributeError) as e:
         board = Board()
-        
+    game.GAME_BOARD2= board    
     game.GAME_BOARD = board
 
     """
@@ -233,6 +240,11 @@ def run():
     # Set up the update clock
     pyglet.clock.schedule_interval(update, 1/10.)
     game.initialize()
+    
+    #Second game board initialized here
+    # if next_part==True:
+    #     game.initialize2()
+
     pyglet.app.run()
 
 class UpdateWrapper(object):

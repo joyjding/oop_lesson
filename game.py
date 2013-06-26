@@ -9,7 +9,8 @@ GAME_BOARD = None
 DEBUG = False
 KEYBOARD = None
 PLAYER = None
-OPPO=None
+OPPO= None
+MELEE = False
 ######################
 
 GAME_WIDTH = 7
@@ -25,23 +26,22 @@ class Tree (GameElement):
 		GAME_BOARD.draw_msg("%s hit a bump! Minus 1 Health. Your current health is %d / 3!" % (player.name, player.health))
 
 	def update(self,dt):
-		if (PLAYER.x==6 and PLAYER.y==6) or (OPPO.x==6 and OPPO.y==6) :
-			self.end=True
+		if (PLAYER.x==6 and PLAYER.y==6) or (OPPO.x==6 and OPPO.y==6):
 			GAME_BOARD.del_el(self.x, self.y)
 
 
 class MovingTree(Tree):
 	IMAGE="TallTree"
+	SOLID=True
 
 class Cw1_tree(MovingTree):
 
 	def update(self,dt):
-		
-		if self.end==True:
+		if (PLAYER.x == 6 and PLAYER.y ==6) or (OPPO.x == 6 and OPPO.y ==6)  or MELEE==True:
 			GAME_BOARD.del_el(self.x, self.y)
 			return
 		self.last_time+=dt
-		if self.last_time<1 or self.x==6 or self.y==6:
+		if self.last_time<1 or self.x==6 or self.y==6 or MELEE==True :
 			return
 		if self.mark==0:
 			GAME_BOARD.del_el(self.x, self.y)
@@ -67,12 +67,12 @@ class Cw1_tree(MovingTree):
 class Ccw2_tree(MovingTree):
 
 	def update(self,dt):
-		if (PLAYER.x == 6 and PLAYER.y ==6) or (OPPO.x == 6 and OPPO.y ==6):
+		if (PLAYER.x == 6 and PLAYER.y ==6) or (OPPO.x == 6 and OPPO.y ==6)  or MELEE==True:
 			GAME_BOARD.del_el(self.x, self.y)
 			return
 
 		self.last_time+=dt
-		if self.last_time<1.5:
+		if self.last_time<1.5 or MELEE==True:
 			return
 		if self.mark==0:
 			GAME_BOARD.del_el(self.x, self.y)
@@ -98,10 +98,10 @@ class Ccw2_tree(MovingTree):
 class Zigzag_tree(MovingTree):
 	
 	def update(self,dt):
-		if (PLAYER.x == 6 and PLAYER.y ==6) or (OPPO.x == 6 and OPPO.y ==6):
+		if (PLAYER.x == 6 and PLAYER.y ==6) or (OPPO.x == 6 and OPPO.y ==6) or MELEE==True:
 			return
 		self.last_time+=dt
-		if self.last_time<2:
+		if self.last_time<2 or MELEE==True:
 			return
 		if self.mark==0:
 			GAME_BOARD.del_el(self.x, self.y)
@@ -153,6 +153,9 @@ class Zigzag_tree(MovingTree):
 			GAME_BOARD.set_el(self.x-1,self.y,self)
 			self.last_time=0	    	
 			self.mark=0		
+
+
+
 
 
 class Character(GameElement):
@@ -244,6 +247,54 @@ class Finish_block(GameElement):
 	IMAGE = "Chest"
 	SOLID = False
 
+class Key(GameElement):
+	IMAGE = "Key"
+	SOLID = False
+
+	def interact(self,player):
+		global MELEE
+		MELEE=True
+		GAME_BOARD.wipe()
+		GAME_BOARD.draw_msg("Choose your next adventure by picking a door.")		
+		
+	def update(self,dt):
+		winner = False
+		if PLAYER.x == 6 and PLAYER.y ==6:
+			winner=PLAYER.name
+		if OPPO.x ==6 and OPPO.y==6:
+			winner=OPPO.name
+		if winner !=False:
+			GAME_BOARD.set_el(2,5,self)
+
+class DeathChest(GameElement):
+	IMAGE = "DoorClosed"
+	SOLID = False
+	
+	def interact(self,player):
+		GAME_BOARD.draw_msg("You picked the wrong door. You're eaten by disarray!")
+
+	def update(self,dt):
+		if MELEE==True:
+			GAME_BOARD.set_el(3,3,self)
+			GAME_BOARD.set_el(4,3,self)
+
+class LiveChest(GameElement):
+	IMAGE = "DoorClosed"
+	SOLID = False
+	
+	def interact(self,player):	
+		GAME_BOARD.draw_msg("You picked the right door. YOU WIN!")
+
+	def update(self,dt):
+		if MELEE==True:
+			GAME_BOARD.set_el(2,3,self)
+
+# class DeathChest(GameElement):
+# 	IMAGE = "Chest"
+# 	SOLID = False
+# 	GAME_BOARD.draw_msg("You picked the wrong chest. You're dead!")
+
+
 ####   End class definitions    ####
 def keyboard_handler():
 
@@ -291,8 +342,8 @@ def keyboard_handler():
 			GAME_BOARD.del_el(OPPO.x, OPPO.y)
 			GAME_BOARD.set_el(next_x,next_y,OPPO)  
 
-
 def initialize():  
+
 	global PLAYER
 	PLAYER=Character()
 	GAME_BOARD.register(PLAYER)
@@ -339,13 +390,27 @@ def initialize():
 		GAME_BOARD.register(gem)
 		GAME_BOARD.set_el(pos[0],pos[1],gem)
 		gems.append(gem)	
-
 	finish = Finish_block()
 	GAME_BOARD.register(finish)
 	GAME_BOARD.set_el(6,6, finish)
+
+	key=Key()
+	GAME_BOARD.register(key)
+	GAME_BOARD.draw_msg("Ascertain the treasure chest!")
 	
-	GAME_BOARD.draw_msg("Ascertain the treasure chest!")      
-		
+	live_chest=LiveChest()
+	GAME_BOARD.register(live_chest)
 
+	death_chest=DeathChest()
+	GAME_BOARD.register(death_chest)
+	# 	global PLAYER
+	# 	PLAYER=Character()
+	# 	GAME_BOARD2.register(PLAYER)
+	# 	GAME_BOARD2.set_el(1,0,PLAYER)
 
+	# 	global OPPO
+	# 	OPPO=Opponent()
+	# 	GAME_BOARD2.register(OPPO)
+	# 	GAME_BOARD2.set_el(0,1,OPPO)	
 		
+	# 	GAME_BOARD2.draw_msg("You're in a new place now! Fight Fight Fight Fight!")
